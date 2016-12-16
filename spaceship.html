@@ -2,33 +2,107 @@
 <head>
 <title>Space Arcade Game</title>
 <script type="text/javascript">
-function Playground(a,b){this.paintSteps=[];this.sprites=[];return this.$init(a,b)}
-(function(a,b,c,e,f){
-  function property(a,b,c){var d;a[b]=function(e){if(typeof e=="undefined")return d;d=e;return a};if(typeof c!="undefined")a[b](c);return a}
-  function isArray(a){
-    if(typeof a=="undefined" || a=="null") return false;
-    var n=new RegExp("\\bArray\\b","g"),result=false;
-    (""+a.constructor).replace(n,function(){result=true});
-    return result
+class Playground{
+  constructor(a,b){
+    let t=this;
+    function property(a,b,c){
+      let d;
+      a[b]=function(e){
+        if(typeof e=="undefined")
+          return d;
+        d=e;
+        return a
+      };
+      if(typeof c!="undefined")
+      a[b](c);
+      return a;
+    }
+    this.paintSteps=[];
+    this.sprites=[];
+    property(t,"element",a);
+    property(t,"canvas",a.getContext("2d"));
+    property(t,"timer");
+    property(t,"background");
+    property(t,"background_x");
+    property(t,"background_y");
+    property(t,"backgroundDirection");
+    property(t,"backgroundStep");
+    property(t,"interval",b);
+    t.background_x(0)
+      .background_y(0);
+    return t;
   }
-  function isPoint(a){
-    if(typeof a=="undefined" || a=="null") return false;
-    return isArray(a) && a.length==2 && typeof a[0]=="number" && typeof a[1]=="number"
+  isArray(a){
+    if(typeof a=="undefined" || a=="null")
+      return false;
+    let n=new RegExp("\\bArray\\b","g"),r=false;
+    (""+a.constructor).replace(n,function(){
+      r=true
+    });
+    return r;
   }
-  function arePoints(a){
-    if(typeof a=="undefined" || a=="null") return false;
-    if(isArray(a)){
-      for(var i=0;i<a.length;i++) if(!isPoint(a[i])) return false;
-    }else return false;
-    return true
+  isPoint(a){
+    if(typeof a=="undefined" || a=="null")
+      return false;
+    return this.isArray(a) && a.length==2 && typeof a[0]=="number" && typeof a[1]=="number";
   }
-  e.$init=function(a,b){var t=this;property(t,"element",a);property(t,"canvas",a.getContext("2d"));property(t,"timer");property(t,"background");property(t,"background_x");property(t,"background_y");property(t,"backgroundDirection");property(t,"backgroundStep");property(t,"interval",b);t.background_x(0).background_y(0);return t};
-  function action(a,b,c){var d=c;a[b]=function(){d();return a};return a}
-  e.action=function(a,b){var t=this;action(t,a,b);return t};
-  e.paint=function(a){var t=this,j=t.paintSteps;if(typeof a=="function")j.push(a);return t};
-  e.refresh=function(){var t=this,j=t.paintSteps,l=t.sprites;m=j.length,n=l.length,d=(""+t.backgroundDirection()).toLowerCase();
+  arePoints(a){
+    if(typeof a=="undefined" || a=="null")
+      return false;
+    if(this.isArray(a)){
+      for(var i=0;i<a.length;i++)
+        if(!this.isPoint(a[i]))
+          return false;
+    }else
+      return false;
+    return true;
+  }
+  start(){
+    let t=this,b=t.interval();
+    t.refresh()
+      .timer(setInterval(function(){
+        t.refresh()
+      },b));
+    return t;
+  }
+  stop(){
+    let t=this;
+    clearInterval(t.timer());
+    return t;
+  }
+  add(a){
+    let t=this,l=t.sprites;
+    if(typeof a=="object" && typeof a["paint"]=="function")l.push(a);
+    return t;
+  }
+  remove(a){
+    let b=this,c=b.sprites,d;
+    for(let i=0;i<c.length;i++){
+      if(c[i]===a) d=i
+    }
+    if(typeof d=="number"){
+      let e=c.slice(d+1);
+      c.length=d;
+      b.sprites.push.apply(c,e);
+    }
+    return b
+  }
+  action(a,b){let t=this;
+    function action(a,b,c){let d=c;a[b]=function(){d();return a};return a}
+    action(t,a,b);return t
+  }
+  paint(a){let t=this,j=t.paintSteps;if(typeof a=="function")j.push(a);return t};
+  refresh(){
+    let t=this,
+      j=t.paintSteps,
+      l=t.sprites,
+      m=j.length,
+      n=l.length,
+      d=(""+t.backgroundDirection()).toLowerCase();
     if(typeof t.background()!="undefined" && (d=="up" || d=="down" || d=="left" || d=="right") && typeof t.backgroundStep()=="number"){
-      var image=t.background(),w=image.width,h=image.height;
+      let image=t.background(),
+        w=image.width,
+        h=image.height;
       if(d=="left") t.background_x(t.background_x()-t.backgroundStep());
       if(d=="right") t.background_x(t.background_x()+t.backgroundStep());
       if(d=="up") t.background_y(t.background_y()-t.backgroundStep());
@@ -41,46 +115,31 @@ function Playground(a,b){this.paintSteps=[];this.sprites=[];return this.$init(a,
       if (t.background_y() <= -1 * h) t.background_y(t.background_y()+h);
       if (t.background_y() >= 1 * h) t.background_y(t.background_y()-h);
     }
-  if(m>0)for(var i=0;i<m;i++){j[i](t)}if(n>0)for(var i=0;i<n;i++){l[i].paint(t)}return t};
-  e.start=function(){var t=this,b=t.interval();t.refresh().timer(setInterval(function(){t.refresh()},b));return t};
-  e.stop=function(){var t=this;clearInterval(t.timer());return t};
-  e.add=function(a){var t=this,l=t.sprites;if(typeof a=="object" && typeof a["paint"]=="function")l.push(a);return t};
-  e.remove=function(a){
-    var b=this,c=b.sprites,d;
-    for(var i=0;i<c.length;i++){
-      if(c[i]===a) d=i
-    }
-    if(typeof d=="number"){
-      var e=c.slice(d+1);
-      c.length=d;
-      b.sprites.push.apply(c,e);
-    }
-    return b
-  };
-  for(var i=0;i<a.length;i++){(function(a,b){a[b]=function(){var t=this;var g=t.canvas();g[b].apply(g,arguments);return t}}(e,a[i]))}
-  for(var i=0;i<b.length;i++){(function(a,b){a[b]=function(a){var t=this,g=t.canvas();if(a){g[b]=a;return t}return g[b]}}(e,b[i]))}
-  for(var i=0;i<c.length;i++){(function(a,b){a[b]=function(){var g=this.canvas();return g[b].apply(g,arguments)}}(e,c[i]))}
-  e.strokePoints=function(a,b){
-    var t=this,c=false;
-    if(arePoints(a) && a.length>1){
+    if(m>0)for(let i=0;i<m;i++){j[i](t)}
+    if(n>0)for(let i=0;i<n;i++){l[i].paint(t)}
+    return t;
+  }
+  strokePoints(a,b){
+    let t=this,c=false;
+    if(this.arePoints(a) && a.length>1){
       if(typeof b=="object"){
         if(typeof b["width"]=="number") t.lineWidth(b.width);
         if(typeof b["style"]!="undefined") t.strokeStyle(b.style);
         if(typeof b["closePath"]=="boolean") c=b.closePath
       }
       t.beginPath().moveTo(a[0][0],a[0][1]);
-      for(var i=1;i<a.length;i++)
+      for(let i=1;i<a.length;i++)
         t.lineTo(a[i][0],a[i][1]);
       if(c){t.closePath().stroke()}
       else
       t.stroke()
     }
     return t
-  };
-  e.fillArc=function(a,b,c,d,e,f,g,h){
-    var t=this;
+  }
+  fillArc(a,b,c,d,e,f,g,h){
+    let t=this;
     if(typeof a=="number" && typeof b=="number" && typeof c=="number" && typeof d=="number" && typeof e=="number"){
-      var f=typeof f=="boolean"?f:false,g=typeof g=="boolean"?g:true;
+      let f=typeof f=="boolean"?f:false,g=typeof g=="boolean"?g:true;
       if(typeof h=="object"){
         if(typeof h["borderWidth"]=="number") t.lineWidth(h.borderWidth);
         if(typeof h["borderStyle"]!="undefined") t.strokeStyle(h.borderStyle)
@@ -90,11 +149,11 @@ function Playground(a,b){this.paintSteps=[];this.sprites=[];return this.$init(a,
       if(f) t.stroke()
     }
     return t
-  };
-  e.strokeArc=function(a,b,c,d,e,f,g){
-    var t=this,i=false;
+  }
+  strokeArc(a,b,c,d,e,f,g){
+    let t=this,i=false;
     if(typeof a=="number" && typeof b=="number" && typeof c=="number" && typeof d=="number" && typeof e=="number"){
-      var f=typeof f=="boolean"?f:true;
+      f=(typeof f=="boolean")?f:true;
       if(typeof g=="object"){
         if(typeof g["borderWidth"]=="number") t.lineWidth(g.borderWidth);
         if(typeof g["borderStyle"]=="string") t.strokeStyle(g.borderStyle);
@@ -106,132 +165,161 @@ function Playground(a,b){this.paintSteps=[];this.sprites=[];return this.$init(a,
         t.beginPath().arc(a,b,c,d,e,f).stroke();
     }
     return t
-  };
-  e.loop=function(a,b,c){for(;a<=b;a++)c(this,a);return this};
-  e.step=function(a,b,c,d){for(;a<=b;a+=c)d(this,a);return this};
-  e.test=function(a,b){if(a)b(this);return this};
-  e.transform=function(a,b){
-    var t=this;t.save();if(typeof a=="function" && typeof b=="undefined"){a(t)}
+  }
+  loop(a,b,c){for(;a<=b;a++)c(this,a);return this}
+  step(a,b,c,d){for(;a<=b;a+=c)d(this,a);return this}
+  test(a,b){if(a)b(this);return this}
+  transform(a,b){
+    let t=this;t.save();if(typeof a=="function" && typeof b=="undefined"){a(t)}
     else if((typeof a=="null" || typeof a=="object") && typeof b=="function"){
       if(typeof a=="object"){
-        if(typeof a["translate"]=="object" && isPoint(a.translate))t.translate(a.translate[0],a.translate[1]);
+        if(typeof a["translate"]=="object" && this.isPoint(a.translate))t.translate(a.translate[0],a.translate[1]);
         if(typeof a["rotate"]=="number")t.rotate(a.rotate);
-        if(typeof a["scale"]=="object" && isPoint(a.scale))t.scale(a.scale[0],a.scale[1])
+        if(typeof a["scale"]=="object" && this.isPoint(a.scale))t.scale(a.scale[0],a.scale[1])
       }
       b(t)
-    };t.restore();return t
-  };
-  e.transformPoints=function(a,b,c){
-    var t=this;
+    };
+    t.restore();
+    return t
+  }
+  transformPoints(a,b,c){
+    let t=this;
     t.transform(a,function(){t.strokePoints(b,c)});
     return t
-  };
-  e.transformShape=function(a){
-    var t=this;
+  }
+  transformShape(a){
+    let t=this;
     if(typeof a=="object"){
       t.transformPoints(a.transform, a.points, a.lineStyle)
     }
     return t
-  };
-  for(var i=0;i<f.length;i++){(function(a,b){
+  }
+}
+(function(a,b,c,e,f){
+  for(let i=0;i<a.length;i++){(function(a,b){a[b]=function(){let t=this;let g=t.canvas();g[b].apply(g,arguments);return t}}(e,a[i]))}
+  for(let i=0;i<b.length;i++){(function(a,b){a[b]=function(a){let t=this,g=t.canvas();if(a){g[b]=a;return t}return g[b]}}(e,b[i]))}
+  for(let i=0;i<c.length;i++){(function(a,b){a[b]=function(){let g=this.canvas();return g[b].apply(g,arguments)}}(e,c[i]))}
+  for(let i=0;i<f.length;i++){(function(a,b){
     a[b]=function(a){
-      var t=this;
+      let t=this;
       if(typeof a=="function"){
         t.element().addEventListener(b,a,false)
       }
       return t
     }
   }(e,f[i]))}
-
 }(["arc","arcTo","beginPath","bezierCurveTo","clearRect","clip","closePath","drawImage","fill","fillRect","fillText","lineTo","moveTo","putImageData","quadraticCurveTo","rect","restore","rotate","save","scale","setTransform","stroke","strokeRect","strokeText","transform","translate"],
 ["fillStyle","font","strokeStyle","lineWidth","lineCap"],
 ["createImageData","createLinearGradient","createPattern","createRadialGradient","getImageData","isPointInPath","measureText"],
 Playground.prototype,
 ["mousemove","touchmove","mouseup"]));
-alert(typeof Playground);
-function Ship(){
-	this.init();
+class Sprite{
+  constructor(x,y,img,visible){
+    this._x=typeof x=="number" ? x : 0;
+		this._y=typeof y=="number" ? y : 0;
+    this._img=typeof img == "string" ?img : null;
+    this._visible=visible|true;
+  }
+  reset(){}
+  get visible(){
+    return this._visible;
+  }
+  set visible(a){
+    if(typeof a == "boolean")
+      this._visible=a;
+  }
+  get x(){
+    return this._x;
+  }
+  set x(x){
+    if(typeof x=="number")
+      this._x=x;
+  }
+  get y(){
+    return this._y;
+  }
+  set y(y){
+    if(typeof y=="number")
+      this._y=y;
+  }
+  get img(){
+    return this._img;
+  }
+  set img(id){
+    this._img=id;
+  }
+  paint(c){
+    if(this._visible)
+      c.drawImage(document.getElementById(this._img),this._x,this._y);
+  }
 }
-Ship.prototype={
-	init:function(){
-		this.x=10;
-		this.y=140;
-	},
-	paint:function(c){
-		c.drawImage(document.getElementById("spaceship"),this.x,this.y)
-	}
-};
-function Target(){
-	this.init(0,0)
+class Ship extends Sprite{
+	constructor(){
+    super(10,140,"spaceship");
+  }
 }
-Target.prototype={
-	init:function(x,y){
-		if(typeof x=="number")this.x=x;
-		if(typeof y=="number")this.y=y;
+
+class Target extends Sprite{
+  constructor(x,y){
+    super(x,y,"ufo",false);
 		this.visible=false;
 		this.speed=1.5;
 		this.phase=0;
-	},
-	paint:function(c){
+  }
+  paint(c){
 		if (this.visible){
 			this.x -= this.speed;
 			if(this.x<-300) this.x=this.init_x;
 			this.phase += 0.1;
 			this.y = 150 + 25 * Math.sin(this.phase);
-			c.drawImage(document.getElementById("ufo"),this.x, this.y)
+			c.drawImage(document.getElementById(this.img),this.x, this.y)
 			.strokeArc(this.x+20,this.y+20, 20, 0, 2 * Math.PI,true,{borderStyle:"#000"});
 			this.checkCollision(c);
 		}
-	},
-	checkCollision:function(c){
-		for(var i=0;i<bullet.length;i++){
+	}
+	checkCollision(c){
+		for(let i=0;i<bullet.length;i++){
 			if (bullet[i].visible && c.isPointInPath(bullet[i].x,bullet[i].y)) {
 				this.visible=false;
+        score+=10;
 				bullet[i].visible=false;
 				playground.remove(bullet);
-				var e=bullet.slice(i+1);
+				let e=bullet.slice(i+1);
 				bullet.length=i;
 				bullet.push.apply(bullet,e);
-				this.addScore(10);
 				bulletcount--;
 				break
 			}
 		}
-	},
-	addScore:function(a){
-		score+=a;
-	}
-};
-function Bullet(x,y){
-	this.init(x,y)
-}
-Bullet.prototype={
-	init:function(x,y){
-		if(typeof x=="number") this.x=x;
-		if(typeof y=="number") this.y=y;
-		this.visible=false;
-	},
-	paint:function(c){
-		if(this.visible){
-			this.x += 4;
-			if (this.x > document.getElementById("can").width) {
-				var i;
-				this.visible = false;
-				c.remove(this);
-				for(i=0;i<bullet.length;i++){
-					if(bullet[i]==this) break;
-				}
-				var e=bullet.slice(i+1);
-				bullet.length=i;
-				bullet.push.apply(bullet,e);
-				bulletcount--
-			}
-			c.fillStyle("#FF8").fillRect(this.x,this.y,6,1)
-		}
 	}
 }
-var playground;
-var ship=new Ship(),
+class Bullet extends Sprite{
+	constructor(x,y){
+    super(x,y,null,false);
+  }
+  paint(c){
+    if(this.visible){
+      this.x += 4;
+      if (this.x > document.getElementById("can").width) {
+        let i;
+        this.visible = false;
+        c.remove(this);
+        for(i=0;i<bullet.length;i++){
+          if(bullet[i]==this) break;
+        }
+        let e=bullet.slice(i+1);
+        bullet.length=i;
+        bullet.push.apply(bullet,e);
+        bulletcount--
+      }
+      c.fillStyle("#FF8").fillRect(this.x,this.y,6,1)
+    }
+  }
+}
+let playground;
+let ship=new Ship();
+
+let
 	target = [new Target(),new Target(),new Target(),new Target(),new Target()],
 	bullet=[],
 	bulletcount=0;
@@ -266,7 +354,7 @@ function init() {
 	})
 	.mouseup(function(e){
 		if(bullet.length<3){
-			var b=new Bullet();
+			let b=new Bullet();
 			b.x = ship.x+30;
 			b.y = ship.y + 15;
 			b.visible=true;
@@ -276,7 +364,7 @@ function init() {
 		}
 	})
 	.paint(function(c){
-		var count=0;
+		let count=0;
 		for (i=0;i<target.length;i++) {
 			if(target[i].visible) count++
 		}
